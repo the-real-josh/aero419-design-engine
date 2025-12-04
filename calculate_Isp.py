@@ -1,74 +1,56 @@
 import cantera as ct
 import numpy as np
 
-# OVERALL GOAL: GET THE SPECIFIC IMPULSE (see bottom of code)
-def calc_delta_h(T2, T1, p2=101325.0, p1=101325.0):
-    # can generally assume that cp ≠ f(p) and get good results, so set arbitrary pressures for now
-    # DO NOT assume perfect gas behavior, as T can be very high. Assume cp = f(T)
-    # assume the gas is made of the following species: 1 mol co2 and 2 mol h2o
-    # assume constituents do not liquify
-    # write code here
-    
-    # Create gas object with CO2 and H2O
+def calculate_rocket_performance(T0=300, P0=400*101325, equivalence_ratio=1.4):
+    # Create gas object
     gas = ct.Solution('gri30.yaml')
     
-    # Set composition: 1 mol CO2, 2 mol H2O (mole fractions)
-    gas.X = {'CO2': 1.0/3.0, 'H2O': 2.0/3.0}
-    
-    # Calculate specific enthalpy at state 1
-    gas.TP = T1, p1
-    h1 = gas.enthalpy_mass  # J/kg
-    
-    # Calculate specific enthalpy at state 2
-    gas.TP = T2, p2
-    h2 = gas.enthalpy_mass  # J/kg
-    
-    # Return specific enthalpy change in J/kg
-    delta_h = h2 - h1  # J/kg
-    
-    return delta_h
-
-
-def calculate_adiabatic_flame_temp(T0=300, P0=400*101325):
-    fuel = {'CH4': 1}
-    oxidizer = {'O2': 1}
-
-    # Create gas object using GRI-Mech 3.0 (good for methane combustion)
-    gas = ct.Solution('gri30.yaml')
-    # Set initial state
+    # Set initial state and mixture (fuel-rich for better performance)
     gas.TP = T0, P0
+    gas.set_equivalence_ratio(equivalence_ratio, {'CH4': 1}, {'O2': 1})
     
-    # Set the equivalence ratio and mixture composition
-    gas.set_equivalence_ratio(1, fuel, oxidizer)
+    # Calculate adiabatic flame temperature
+    gas.equilibrate('HP')
+    T_comb = gas.T
     
-    # Store initial enthalpy and density for different cases
-    h0 = gas.h  # specific enthalpy
-    rho0 = gas.density
+    # Store combustion products composition
+    X_products = gas.X
     
-    # Calculate adiabatic flame temperature at constant pressure
-    gas_hp = ct.Solution('gri30.yaml')
-    gas_hp.TPX = T0, P0, gas.X
-    gas_hp.equilibrate('HP')  # Hold enthalpy and pressure constant
-    T_ad_HP = gas_hp.T # constant-volume combustion
+    # Now expand isentropically to exit pressure
+    p_ex = 101325.0  # atmospheric
+    s_comb = gas.s  # entropy at combustion
     
-    # need to assume constant pressure since reactants are injected into the combustion chamber at the same 
-    # pressure that the combustion occurs at
-    # furthermore, open nozzle allows for expansion
-    return T_ad_HP
+    # Isentropic expansion to exit pressure
+    gas.SP = s_comb, p_ex
+    T_ex = gas.T
+    h_ex = gas.enthalpy_mass
+    
+    # Get enthalpy at combustion conditions
+    gas.TP = T_comb, P0
+    gas.X = X_products  # Use actual products
+    h_comb = gas.enthalpy_mass
+    
+    # Calculate exit velocity
+    delta_h = h_comb - h_ex
+    v_e = np.sqrt(2 * delta_h) * 0.92  # velocity correction factor
+    
+    # Specific impulse
+    g0 = 9.8066
+    Isp = v_e / g0
+    
+    return Isp, v_e, T_comb, T_ex
 
+# Run with fuel-rich mixture
 
-k = 1.1386 # https://cearun.grc.nasa.gov/cgi-bin/CEARUN/donecea3.cgi
-p_ex = 101325.0 # atmospheric ambient pressure
-p_comb = p_ex * 400.0 # max attainable pressure rise in turbopumps
-T_comb = calculate_adiabatic_flame_temp() # assume optimal combustion
-T_ex = T_comb * (p_ex / p_comb)**((k-1)/k)  # T_ex = exit temperature
-delta_h = calc_delta_h(T_comb, T_ex)
-xi_v = 0.92 # velocity correction factor due to isentropic assumption
-v_e = np.sqrt(2*delta_h) * xi_v # adiabatic approximation
-g0 = 9.8066 # m/sec^2
-Isp = v_e / g0 # https://en.wikipedia.org/wiki/Rocket_engine#Types_of_rocket_engines
+import scipy as sp
+Isp, v_e, T_comb, T_ex = calculate_rocket_performance(equivalence_ratio=1.373)
 
-print(f'Specific Impulse: {Isp:.2f} s\n'
-      f'Exit velocity: {v_e/1000} km/sec\n'
-      f'Chamber pressure: {p_comb/100000} bar\n'
-      f'Best-case combustion chamber temperature {int(T_comb)} K\n')
+# optimizer gets an equivalence ratio of 1.373
+# F = lambda eq: -calculate_rocket_performance(equivalence_ratio=eq)[0]
+# res = sp.optimize.minimize(F, 1.0, method='CG')
+# print(res)
+
+print(f'Specific Impulse: {Isp:.2f} s')
+print(f'Exit velocity: {v_e/1000:.2f} km/s')
+print(f'Chamber temperature: {int(T_comb)} K')
+print(f'Exit temperature: {int(T_ex)} K')
