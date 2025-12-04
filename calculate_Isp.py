@@ -63,8 +63,12 @@ p_comb = p_ex * 400.0 # max attainable pressure rise in turbopumps
 T_comb = calculate_adiabatic_flame_temp() # assume optimal combustion
 T_ex = T_comb * (p_ex / p_comb)**((k-1)/k)  # T_ex = exit temperature
 delta_h = calc_delta_h(T_comb, T_ex)
-v_e = np.sqrt(2*delta_h) # adiabatic approximation
+xi_v = 0.92 # velocity correction factor due to isentropic assumption
+v_e = np.sqrt(2*delta_h) * xi_v # adiabatic approximation
 g0 = 9.8066 # m/sec^2
 Isp = v_e / g0 # https://en.wikipedia.org/wiki/Rocket_engine#Types_of_rocket_engines
 
-print(f'{Isp=:.2f}')
+print(f'Specific Impulse: {Isp:.2f} s\n'
+      f'Exit velocity: {v_e/1000} km/sec\n'
+      f'Chamber pressure: {p_comb/100000} bar\n'
+      f'Best-case combustion chamber temperature {int(T_comb)} K\n')
