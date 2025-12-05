@@ -36,5 +36,5 @@ print(f'volume of methane tank: {vol_meth} m3\n'
     f'{kg_meth} kg of methane and {kg_o2} kg of oxygen\n')
 
 # came up with a nice-shaped rocket here https://www.desmos.com/calculator/qpvwabeppx
-# radius of tanks - 1.2 m
-# height of tanks - 50 m
+# diameter of tanks - 3 m
+# height of tanks - 35 m

@@ -11,7 +11,7 @@ m_dry = sum([
     6000    # mass of the fuel tanks and other hardware
 ])
 burn_time = 128.67 # seconds
-f = 0.05 # mass fraction - NEEDS to be below 0.7, neglecting gravity (see old\calculate_mass_nograv.py)
+f = 0.05 # mass fraction - NEEDS to be below 0.07, neglecting gravity (see old\calculate_mass_nograv.py)
 m_propellant = m_dry/f
 
 g = 9.8 # estimate for entire flight

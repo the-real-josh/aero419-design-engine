@@ -15,7 +15,7 @@ a_orb = G_newt * m_earth / (r_earth**2)
 v_orbit = sqrt(r_orbit*a_orb)
 
 # achooski rocket equation
-from calculate_Isp import v_e # around 3.1 km/sec
+v_e = 3.1e3 # around 3.1 km/sec
 f = exp(v_orbit / v_e)**-1 # mass fraction (mass of vehicle / mass of fuel)
 m_dry = sum([
     1000, # payload (for sure). Assume it includes fairings
