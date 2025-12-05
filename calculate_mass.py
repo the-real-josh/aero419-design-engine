@@ -18,12 +18,15 @@ v_orbit = sqrt(r_orbit*a_orb)
 from calculate_Isp import v_e # around 3.1 km/sec
 f = exp(v_orbit / v_e)**-1 # mass fraction (mass of vehicle / mass of fuel)
 m_dry = sum([
-    1000, # payload (for sure)
-    1000, # rocket engine (??)
-    2000, # fuel tank (should be a function of the amount of fuel)
+    1000, # payload (for sure). Assume it includes fairings
+    3000, # rocket engine (??, based on rs25)
+    2000, # fuel tank (should be a function of the amount of fuel), carbon fiber, idk
 ])
 m_fuel = m_dry/f
+m_total = m_dry + m_fuel
 
 if __name__ == '__main__':
+    print(f'orbital velocity for required altitude of {altitude} m: {v_orbit}')
     print(f'fuel mass fraction: {f}') # our rocket will be about 7% rocket
     print(f'{m_fuel=}')
+    print(f'{m_total=}')
