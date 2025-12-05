@@ -32,7 +32,7 @@ def calculate_rocket_performance(T0=300, P0=400*101325, equivalence_ratio=1.4):
     
     # Calculate exit velocity
     delta_h = h_comb - h_ex
-    v_e = np.sqrt(2 * delta_h) * 0.92  # velocity correction factor
+    v_e = np.sqrt(2 * delta_h) * 0.95  # velocity correction factor
     
     # Specific impulse
     g0 = 9.8066
@@ -42,15 +42,16 @@ def calculate_rocket_performance(T0=300, P0=400*101325, equivalence_ratio=1.4):
 
 # Run with fuel-rich mixture
 
-import scipy as sp
 Isp, v_e, T_comb, T_ex = calculate_rocket_performance(equivalence_ratio=1.373)
 
 # optimizer gets an equivalence ratio of 1.373
+# import scipy as sp
 # F = lambda eq: -calculate_rocket_performance(equivalence_ratio=eq)[0]
 # res = sp.optimize.minimize(F, 1.0, method='CG')
 # print(res)
 
-print(f'Specific Impulse: {Isp:.2f} s')
-print(f'Exit velocity: {v_e/1000:.2f} km/s')
-print(f'Chamber temperature: {int(T_comb)} K')
-print(f'Exit temperature: {int(T_ex)} K')
+if __name__ == '__main__':
+    print(f'Specific Impulse: {Isp:.2f} s')
+    print(f'Exit velocity: {v_e/1000:.2f} km/s')
+    print(f'Chamber temperature: {int(T_comb)} K')
+    print(f'Exit temperature: {int(T_ex)} K')
