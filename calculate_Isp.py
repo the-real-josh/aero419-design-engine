@@ -1,7 +1,13 @@
 import cantera as ct
 import numpy as np
 
+# design choices
+p0=400*1013255 # chamber pressure
+phi = 1.373 # equivalence ratio
+
 def calculate_rocket_performance(T0=300, P0=400*101325, equivalence_ratio=1.4):
+    """Calcualtes the combusion temperature of methane and oxygen and then isentropically expands it"""
+
     # Create gas object
     gas = ct.Solution('gri30.yaml')
     
@@ -42,7 +48,7 @@ def calculate_rocket_performance(T0=300, P0=400*101325, equivalence_ratio=1.4):
 
 # Run with fuel-rich mixture
 
-Isp, v_e, T_comb, T_ex = calculate_rocket_performance(equivalence_ratio=1.373)
+Isp, v_e, T_comb, T_ex = calculate_rocket_performance(equivalence_ratio=phi)
 
 # optimizer gets an equivalence ratio of 1.373
 # import scipy as sp
