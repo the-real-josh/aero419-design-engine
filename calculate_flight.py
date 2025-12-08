@@ -2,7 +2,8 @@ import numpy as np
 import scipy as sp
 
 # set by karp
-delta_v_req = 8.159e3 # m/sec
+delta_v_req = 7676.67 # m/sec
+
 
 # design choices
 m_dry = sum([
@@ -19,12 +20,20 @@ m0 = m_dry + m_propellant # kgs
 m_dot = (m_propellant)/burn_time # kg/se, averaged
 m = lambda t: m0 - m_dot*t
 from calculate_Isp import v_e
+
 thrust = m_dot * v_e # newtons, ignores area-pressure term
-F_net = lambda t: thrust - m(t)*g # net force is thrust minus weight
+weight = lambda t: - m(t)*g
+# air_resistance = lambda t: 0.5 * rho(altitude(t)) * velocity(t) * (0.05)
+# 
+air_resistance = lambda t: 0
+
+F_net = lambda t: thrust + weight(t) + air_resistance(t) # net force is net effects of thrust, weight, and air resistance
 a = lambda t: F_net(t) / m(t)
 res = sp.integrate.quad(a, 0, burn_time-0.001)
 assert res[1] < 1e-2
 v = res[0]
+
+# optimize to get a more generous mass fraction (and the )
 
 if __name__ == '__main__':
     print(f'fuel mass: {m_propellant:.2f} kg')

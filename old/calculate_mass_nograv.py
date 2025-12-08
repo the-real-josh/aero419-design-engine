@@ -9,10 +9,12 @@ r_orbit = r_earth + altitude # meters
 # calculate circular orbit
 G_newt = 6.67e-11 # newton's gravitational constant
 m_earth = 5.97e24 # mass of the earth, kg
-a_orb = G_newt * m_earth / (r_earth**2)
+a_orb = G_newt * m_earth / (r_orbit**2)
 
 # taking a_c = v^2/r
 v_orbit = sqrt(r_orbit*a_orb)
+
+input(f'{v_orbit=:.2f} m/s')
 
 # achooski rocket equation
 v_e = 3.1e3 # around 3.1 km/sec
